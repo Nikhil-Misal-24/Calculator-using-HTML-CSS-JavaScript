@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nikhil's Ultimate Calculator</title>
+    <style>
+        :root {
+            --bg: #080808;
+            --btn-dark: #121212;
+            --neon: #00ffaa;
+            --text: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Added for footer alignment */
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .calc-body {
+            background: #0f0f0f;
+            padding: 2.2rem;
+            border-radius: 45px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            border: 1px solid #1a1a1a;
+            position: relative;
+            margin-bottom: 20px; /* Space for footer */
+        }
+
+        .hist-btn {
+            position: absolute;
+            top: 30px; right: 30px;
+            background: none; border: none;
+            color: var(--neon);
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .hist-btn:hover { transform: rotate(-30deg) scale(1.2); }
+
+        .display {
+            width: 100%;
+            height: 110px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            text-align: right;
+            font-size: 3.8rem;
+            font-weight: 200;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        button {
+            aspect-ratio: 1/1;
+            border-radius: 22px;
+            border: none;
+            background: var(--btn-dark);
+            color: #777;
+            font-size: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 6px 6px 12px #000, -2px -2px 8px rgba(255,255,255,0.02);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        button:hover {
+            color: #fff;
+            border: 1px solid rgba(0, 255, 170, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.1), 6px 6px 12px #000;
+        }
+
+        button:active {
+            transform: scale(0.92) translateY(2px);
+            box-shadow: inset 4px 4px 8px #000;
+            color: var(--neon);
+        }
+
+        .op { color: var(--neon); }
+        .eq { 
+            background: var(--neon); 
+            color: #000; 
+            grid-column: span 2; 
+            aspect-ratio: auto; 
+            border-radius: 25px;
+            font-weight: 800;
+        }
+
+        /* Footer Style */
+        .footer {
+            color: #555555;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .footer b {
+            color: var(--neon);
+            text-shadow: 0 0 10px rgba(0, 255, 170, 0.3);
+        }
+
+        .footer:hover {
+            color: #aaa;
+            transform: scale(1.05);
+        }
+
+        /* History Overlay */
+        .history-panel {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(8, 8, 8, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 45px;
+            padding: 30px;
+            display: none;
+            z-index: 20;
+            flex-direction: column;
+            border: 1px solid #222;
+        }
+
+        .history-item {
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.02);
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calc-body">
+        <button class="hist-btn" onclick="toggleHistory()">🕒</button>
+        <input type="text" class="display" id="screen" value="0" readonly>
+        
+        <div class="grid">
+            <button class="op" onclick="clr()">AC</button>
+            <button class="op" onclick="del()">C</button>
+            <button class="op" onclick="ins('%')">%</button>
+            <button class="op" onclick="ins('/')">÷</button>
+
+            <button onclick="ins('7')">7</button>
+            <button onclick="ins('8')">8</button>
+            <button onclick="ins('9')">9</button>
+            <button class="op" onclick="ins('*')">×</button>
+
+            <button onclick="ins('4')">4</button>
+            <button onclick="ins('5')">5</button>
+            <button onclick="ins('6')">6</button>
+            <button class="op" onclick="ins('-')">−</button>
+
+            <button onclick="ins('1')">1</button>
+            <button onclick="ins('2')">2</button>
+            <button onclick="ins('3')">3</button>
+            <button class="op" onclick="ins('+')">+</button>
+
+            <button onclick="ins('0')">0</button>
+            <button onclick="ins('.')">.</button>
+            <button class="eq" onclick="calculate()">=</button>
+        </div>
+
+        <div class="history-panel" id="histOverlay">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:var(--neon);">History</h3>
+                <button onclick="toggleHistory()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">×</button>
+            </div>
+            <div id="histList" style="flex:1; overflow-y:auto; margin:20px 0; scrollbar-width:none;"></div>
+            <button onclick="clearHistory()" style="width:100%; height:45px; border-radius:15px; background:#222; color:#ff4b2b; cursor:pointer;">Clear All</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        Developed By ❤️ <b>Nikhil Misal</b>
+    </div>
+
+    <script>
+        const screen = document.getElementById('screen');
+        const histList = document.getElementById('histList');
+        const histOverlay = document.getElementById('histOverlay');
+
+        function ins(v) {
+            if (screen.value === "0" || screen.value === "Error") screen.value = v;
+            else screen.value += v;
+            vibrate();
+        }
+
+        function clr() { screen.value = "0"; vibrate(); }
+        function del() { screen.value = screen.value.slice(0, -1) || "0"; vibrate(); }
+
+        function calculate() {
+            try {
+                let exp = screen.value;
+                let r = eval(exp.replace('×', '*').replace('÷', '/').replace('−', '-'));
+                r = Number.isInteger(r) ? r : parseFloat(r.toFixed(4));
+                
+                let h = JSON.parse(localStorage.getItem('n_calc_h')) || [];
+                h.unshift({ exp, r });
+                localStorage.setItem('n_calc_h', JSON.stringify(h.slice(0, 15)));
+                
+                screen.value = r;
+                renderHistory();
+            } catch { screen.value = "Error"; }
+            vibrate();
+        }
+
+        function renderHistory() {
+            let h = JSON.parse(localStorage.getItem('n_calc_h')) || [];
+            histList.innerHTML = h.map(i => `
+                <div class="history-item" onclick="useH('${i.r}')">
+                    <div style="color:#555; font-size:0.8rem;">${i.exp} =</div>
+                    <div style="color:var(--neon); font-size:1.2rem; font-weight:bold;">${i.r}</div>
+                </div>
+            `).join('') || '<div style="color:#333; text-align:center; margin-top:50px;">Khali hai...</div>';
+        }
+
+        function useH(v) { screen.value = v; toggleHistory(); }
+        function clearHistory() { localStorage.removeItem('n_calc_h'); renderHistory(); }
+        function toggleHistory() { 
+            histOverlay.style.display = histOverlay.style.display === 'flex' ? 'none' : 'flex'; 
+            renderHistory();
+        }
+
+        function vibrate() { if (navigator.vibrate) navigator.vibrate(12); }
+    </script>
+</body>
+</html>
