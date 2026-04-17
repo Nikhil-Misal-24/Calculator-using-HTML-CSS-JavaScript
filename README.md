@@ -10,7 +10,7 @@ The primary goal of this project is to demonstrate strong front-end development 
 This project also reflects the practical application of JavaScript event handling, DOM manipulation, and efficient logical operations, making it suitable for beginners as well as intermediate developers who want to understand how interactive web applications are built.
 
 
-Features
+⭐Features
 
 Perform essential arithmetic operations such as:
 
@@ -35,7 +35,7 @@ Smooth button interaction effects
 Easy-to-read display screen
 
 
-Functional Highlights:
+⭐Functional Highlights:
 
 Real-time input processing
 
